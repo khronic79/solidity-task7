@@ -73,7 +73,6 @@ describe("SimpleMeta", function () {
         const spenderAddress = spender.address;
         const newValue = 42;
         const nonce = await simpleMeta.nonces(ownerAddress);
-        const deadline = Math.floor(Date.now() / 1000) + 3600; // 1 час в будущем
 
         // Определяем типы данных для EIP-712
         const domain = {

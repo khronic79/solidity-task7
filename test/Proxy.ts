@@ -17,7 +17,7 @@ describe("Proxy", function () {
     beforeEach(async function () {
         [proxyOwner, implementationOwner, burner, minter] =
             await ethers.getSigners();
-        // Развертывание ERC20Mock
+        // Развертывание имплиментации ERC20Mock
         ERC20Mock = await ethers.getContractFactory("MyERC20impliment");
         erc20Mock = await ERC20Mock.deploy();
         await erc20Mock.waitForDeployment();
@@ -25,6 +25,7 @@ describe("Proxy", function () {
         Proxy = await ethers.getContractFactory("Proxy");
         proxy = await Proxy.deploy(erc20Mock.target);
         await proxy.waitForDeployment();
+        // Инициализация ERC20Mock через прокси
         const erc20ThroughProxy = new ethers.Contract(
             proxy.target,
             ERC20Mock.interface,
@@ -52,12 +53,7 @@ describe("Proxy", function () {
             implementationOwner
         );
 
-        const ADMIN_ROLE = await erc20ThroughProxyByOwner.ADMIN_ROLE();
-        const checkRole = await erc20ThroughProxyByOwner.hasRole(
-            ADMIN_ROLE,
-            implementationOwner.address
-        );
-
+   
         await erc20ThroughProxyByOwner.changeMinter(minter.address);
 
         const erc20ThroughProxyByMinter = new ethers.Contract(
