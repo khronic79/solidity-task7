@@ -1,6 +1,8 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: UNLICENSED
 
 pragma solidity 0.8.28;
+
+import "./MyERC20.sol";
 
 interface ITransparentUpgradeableProxy {
     function upgradeTo(address newImplementation) external;
@@ -8,26 +10,30 @@ interface ITransparentUpgradeableProxy {
 
 contract Proxy {
 
-error ProxyDeniedAdminAccess();
-
-address private _implementation;
-address private _admin;
-
+    address private _implementation;
+    address private _admin;
+    error ProxyDeniedAdminAccess();
     constructor(address implementation) {
-            _implementation = implementation;
-            _admin = msg.sender;
-        }
+        _implementation = implementation;
+        _admin = msg.sender;
+    }
 
     function _delegate(address implementation) internal {
         assembly {
             calldatacopy(0, 0, calldatasize())
 
-            let result := delegatecall(gas(), implementation, 0, calldatasize(), 0, 0)
+            let result := delegatecall(
+                gas(),
+                implementation,
+                0,
+                calldatasize(),
+                0,
+                0
+            )
 
             returndatacopy(0, 0, returndatasize())
 
             switch result
-
             case 0 {
                 revert(0, returndatasize())
             }
@@ -50,7 +56,7 @@ address private _admin;
     }
 
     function _dispatchUpgradeTo() private {
-        (address newImplementation) = abi.decode(msg.data[4:], (address));
+        address newImplementation = abi.decode(msg.data[4:], (address));
         _implementation = newImplementation;
     }
 }

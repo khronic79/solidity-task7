@@ -2,10 +2,10 @@
 pragma solidity ^0.8.28;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
-contract MyERC20 is ERC20("My test token", "MTT"), AccessControl {
+contract MyERC20impliment is ERC20("My test token", "MTT"), AccessControl {
     error EIP2612PermisssionExpired(uint256 deadline);
     error EIP2612InvalidSignature(address owner, address signer);
-
+    bool public initialized = false;
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
@@ -22,10 +22,13 @@ contract MyERC20 is ERC20("My test token", "MTT"), AccessControl {
 
     mapping(address account => uint256) public nonces;
 
-    constructor() {
-        address sender = msg.sender;
-        _mint(sender, 1_000_000 ether);
-        _grantRole(ADMIN_ROLE, sender);
+    function initialize() external {
+        if (initialized) {
+            revert("Already initialized");
+        }
+        address admin = msg.sender;
+        _mint(admin, 1_000_000 ether);
+        _grantRole(ADMIN_ROLE, admin);
         _setRoleAdmin(MINTER_ROLE, ADMIN_ROLE);
         _setRoleAdmin(BURNER_ROLE, ADMIN_ROLE);
 
@@ -40,6 +43,8 @@ contract MyERC20 is ERC20("My test token", "MTT"), AccessControl {
                 address(this)
             )
         );
+
+        initialized = true;
     }
 
     // Может быть только один минтер

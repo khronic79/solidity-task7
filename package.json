@@ -2,7 +2,16 @@
   "name": "hardhat-project",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
-    "hardhat": "^2.22.18"
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-prettier": "^5.2.3",
+    "hardhat": "^2.22.18",
+    "prettier": "^3.5.2",
+    "prettier-plugin-solidity": "^1.4.2"
+  },
+  "scripts": {
+    "format": "prettier --write '**/*.{js,ts,sol}'",
+    "format:check": "prettier --check '**/*.{js,ts,sol}'",
+    "format-sol": "prettier --write --plugin=prettier-plugin-solidity 'contracts/**/*.sol'"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^5.2.0"
