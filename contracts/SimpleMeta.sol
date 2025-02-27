@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.28;
 
+// Это простой контракт для демонстрации работы EIP-712
+// Или использования мета транзации
+// Он меняет значение переменной value через функцию setValueWithSig
+// Которая выполняется через делигирование
 contract SimpleMeta {
     error InvalidSignature();
 
@@ -28,7 +32,7 @@ contract SimpleMeta {
             )
         );
     }
-
+    // Не предусмотрен дедлайн для упрощения
     function setValueWithSig(
         address owner,
         address spender,

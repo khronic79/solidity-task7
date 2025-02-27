@@ -2,7 +2,7 @@ import { ethers } from "hardhat";
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 
-describe("SimpleMeta", function () {
+describe("ПРОСТОЙ КОНТРАКТ С ВОЗМОЖНОСТЬ МЕТА ТРАНЗАКЦИИ", function () {
     let SimpleMeta: any;
     let simpleMeta: any;
     let owner: HardhatEthersSigner;
@@ -19,7 +19,7 @@ describe("SimpleMeta", function () {
         await simpleMeta.waitForDeployment();
     });
 
-    it("Should set value with valid signature", async function () {
+    it("Может делегировать изменение стора через подпись", async function () {
         const ownerAddress = owner.address;
         const spenderAddress = spender.address;
         const newValue = 42;
@@ -68,7 +68,7 @@ describe("SimpleMeta", function () {
         expect(value).to.equal(newValue);
     });
 
-    it("Should revert with invalid signature", async function () {
+    it("Не исполняет функцию, если подпись не совпадает", async function () {
         const ownerAddress = owner.address;
         const spenderAddress = spender.address;
         const newValue = 42;

@@ -2,6 +2,11 @@
 pragma solidity ^0.8.28;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
+
+// Контракт аналогичен контракту MyERC20
+// Но в нем нет конструктора
+// Действия из контруктора перенесены в функцию initialize
+// Этот контракт будет использоваться в качестве имплементации для Proxy
 contract MyERC20impliment is ERC20("My test token", "MTT"), AccessControl {
     error EIP2612PermisssionExpired(uint256 deadline);
     error EIP2612InvalidSignature(address owner, address signer);
@@ -22,7 +27,9 @@ contract MyERC20impliment is ERC20("My test token", "MTT"), AccessControl {
 
     mapping(address account => uint256) public nonces;
 
+    // Инициализация контракта для настройки стора Proxy
     function initialize() external {
+        // Стор Proxy может быть инициализирован один раз
         if (initialized) {
             revert("Already initialized");
         }

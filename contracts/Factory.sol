@@ -6,7 +6,7 @@ contract Factory {
     address[] public deployedContracts;
 
     function createContract(string memory _name) public {
-        ContractForFactory newContract = new ContractForFactory(_name);
+        ContractForFactory newContract = new ContractForFactory(_name, msg.sender);
         deployedContracts.push(address(newContract));
     }
 

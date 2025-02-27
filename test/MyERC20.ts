@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 
-describe("MyERC20", function () {
+describe("КОНТРАКТ С РОЛЕВОЙ МОДЕЛЬЮ И PERMIT", function () {
     let MyERC20: any;
     let myERC20: any;
     let owner: HardhatEthersSigner;
@@ -18,37 +18,37 @@ describe("MyERC20", function () {
 
     beforeEach(async function () {
         [owner, addr1, addr2, ...addrs] = await ethers.getSigners();
-
+        // Деплоим контракт
         MyERC20 = await ethers.getContractFactory("MyERC20");
         myERC20 = await MyERC20.deploy();
         await myERC20.waitForDeployment();
     });
 
-    describe("Deployment", function () {
-        it("Should set the right owner", async function () {
+    describe("ДЕПЛОЙ", function () {
+        it("Тот кто деплоит контракт должен быть админом", async function () {
             expect(
                 await myERC20.hasRole(await myERC20.ADMIN_ROLE(), owner.address)
             ).to.equal(true);
         });
 
-        it("Should assign the total supply of tokens to the owner", async function () {
+        it("На деплоера должно быть сминчено 1000000 токенов", async function () {
             const ownerBalance = await myERC20.balanceOf(owner.address);
             expect(await myERC20.totalSupply()).to.equal(ownerBalance);
             expect(ownerBalance).to.equal(INITIAL_SUPPLY);
         });
 
-        it("Should have correct name and symbol", async function () {
+        it("Должны быть установлены корректные имя и символ", async function () {
             expect(await myERC20.name()).to.equal(NAME);
             expect(await myERC20.symbol()).to.equal(SYMBOL);
         });
 
-        it("Should have correct decimals", async function () {
+        it("Должна буть установлена корректная разрадность", async function () {
             expect(await myERC20.decimals()).to.equal(18);
         });
     });
 
-    describe("Roles", function () {
-        it("Should allow admin to change minter", async function () {
+    describe("РОЛИ", function () {
+        it("Админ может назначать минтера", async function () {
             await myERC20.changeMinter(addr1.address);
             expect(
                 await myERC20.hasRole(
@@ -58,7 +58,7 @@ describe("MyERC20", function () {
             ).to.equal(true);
         });
 
-        it("Should allow admin to change burner", async function () {
+        it("Админ может назначать бернера", async function () {
             await myERC20.changeBurner(addr1.address);
             expect(
                 await myERC20.hasRole(
@@ -68,7 +68,7 @@ describe("MyERC20", function () {
             ).to.equal(true);
         });
 
-        it("Should not allow non-admin to change roles", async function () {
+        it("Не админ не может назначать роли", async function () {
             await expect(myERC20.connect(addr1).changeMinter(addr2.address)).to
                 .be.reverted;
             await expect(myERC20.connect(addr1).changeBurner(addr2.address)).to
@@ -76,8 +76,8 @@ describe("MyERC20", function () {
         });
     });
 
-    describe("Minting", function () {
-        it("Should allow minter to mint tokens", async function () {
+    describe("МИНТИНГ", function () {
+        it("Минтинг должен осуществляться с адреса минтера", async function () {
             await myERC20.changeMinter(addr1.address);
             await myERC20.connect(addr1).mint(addr2.address, MINT_AMOUNT);
             expect(await myERC20.balanceOf(addr2.address)).to.equal(
@@ -85,7 +85,7 @@ describe("MyERC20", function () {
             );
         });
 
-        it("Should not allow non-minter to mint tokens", async function () {
+        it("Не минтер не может осуществлять минтинг", async function () {
             await expect(myERC20.mint(addr2.address, MINT_AMOUNT)).to.be
                 .reverted;
             await expect(
@@ -94,8 +94,8 @@ describe("MyERC20", function () {
         });
     });
 
-    describe("Burning", function () {
-        it("Should allow burner to burn tokens", async function () {
+    describe("БЕРНИНГ", function () {
+        it("Бернинг должен осуществляться с адреса бернера", async function () {
             await myERC20.changeBurner(addr1.address);
             await myERC20.connect(addr1).burn(owner.address, BURN_AMOUNT);
             expect(await myERC20.balanceOf(owner.address)).to.equal(
@@ -103,7 +103,7 @@ describe("MyERC20", function () {
             );
         });
 
-        it("Should not allow non-burner to burn tokens", async function () {
+        it("Не бернер не может осуществлять бернинг", async function () {
             await expect(myERC20.burn(owner.address, BURN_AMOUNT)).to.be
                 .reverted;
             await expect(
@@ -111,7 +111,7 @@ describe("MyERC20", function () {
             ).to.be.reverted;
         });
 
-        it("Should revert if burner tries to burn more than the balance", async function () {
+        it("Бернер не может сжечь больше баланса чем есть>", async function () {
             await myERC20.changeBurner(addr1.address);
             await expect(
                 myERC20
@@ -124,11 +124,11 @@ describe("MyERC20", function () {
         });
     });
 
-    describe("Permit", function () {
+    describe("PERMIT", function () {
         const amount = ethers.parseEther("100");
         const deadline = Math.floor(Date.now() / 1000) + 3600;
 
-        it("Should allow permit and approve", async function () {
+        it("Можно аппрувить через permit с учетом стандарта", async function () {
             const ownerAddress = owner.address;
             const spender = addr1.address;
 
@@ -136,14 +136,14 @@ describe("MyERC20", function () {
             const chainId = Number(
                 (await ethers.provider.getNetwork()).chainId
             );
-
+            // Готовим данные для подписи
             const domain = {
                 name: NAME,
                 version: "1",
                 chainId: chainId,
                 verifyingContract: myERC20.target,
             };
-
+            // Готовим типы данных для подписи
             const types = {
                 Permit: [
                     { name: "owner", type: "address" },
@@ -153,7 +153,7 @@ describe("MyERC20", function () {
                     { name: "deadline", type: "uint256" },
                 ],
             };
-
+            // Готовим сообщение для подписи
             const message = {
                 owner: ownerAddress,
                 spender: spender,
@@ -161,11 +161,11 @@ describe("MyERC20", function () {
                 nonce: nonce,
                 deadline: deadline,
             };
-
+            // Подписываем данные в соответствии со стандартом EIP-712
             const signature = await owner.signTypedData(domain, types, message);
-
+            // Извлекаем v, r, s из подписи
             const { v, r, s } = ethers.Signature.from(signature);
-
+            // Вызываем функцию permit в контракте
             await myERC20.permit(
                 ownerAddress,
                 spender,
@@ -181,7 +181,8 @@ describe("MyERC20", function () {
             );
         });
 
-        it("Should revert with invalid signature", async function () {
+        it("Permit должен выбросить ошибку, если подпись не подходит", async function () {
+            // Все делаеми как в предыдущем тесте, только с другим адресом
             const ownerAddress = owner.address;
             const spender = addr1.address;
             const incorrectOwnerAddress = addr2.address;
@@ -233,7 +234,8 @@ describe("MyERC20", function () {
             ).to.be.revertedWithCustomError(myERC20, "EIP2612InvalidSignature");
         });
 
-        it("Should revert if permit expired", async function () {
+        it("Permit должен выбросить ошибку если время вышло", async function () {
+            // Все делаеми как в предыдущем тесте, только с другим адресом
             const ownerAddress = owner.address;
             const spender = addr1.address;
 

@@ -3,7 +3,7 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 
-describe("Proxy", function () {
+describe("PROXY КОНТРАКТ", function () {
     let Proxy: any;
     let ERC20Mock: any;
     let proxy: Contract;
@@ -34,18 +34,21 @@ describe("Proxy", function () {
         await erc20ThroughProxy.initialize();
     });
 
-    it("Should initialize with correct implementation", async function () {
-        // Проверка, что прокси инициализирован с правильной имплементацией
+    it("Адрес имплементации в Proxy должен соответствовать фактическому адресу имплементации", async function () {
+        // Получаем адреc имплементации в Proxy
+        // Выбираем первый слот стора контракта
+        // В нем записан адрес имплементации
         const implementation = await ethers.provider.getStorage(
             await proxy.getAddress(),
             0
         );
+        // Отрезаем 26 символов адреса и сравниваем с фактическим адресом имплементации
         expect(ethers.getAddress("0x" + implementation.slice(26))).to.equal(
             erc20Mock.target
         );
     });
 
-    it("Should delegate calls to ERC20 implementation", async function () {
+    it("Должны вызываться методы имплементации через прокси", async function () {
         // Минт токенов через прокси
         const erc20ThroughProxyByOwner = new ethers.Contract(
             proxy.target,
@@ -53,7 +56,6 @@ describe("Proxy", function () {
             implementationOwner
         );
 
-   
         await erc20ThroughProxyByOwner.changeMinter(minter.address);
 
         const erc20ThroughProxyByMinter = new ethers.Contract(
@@ -74,7 +76,7 @@ describe("Proxy", function () {
         expect(balance).to.equal(ethers.parseEther("1000"));
     });
 
-    it("Should allow admin to upgrade implementation", async function () {
+    it("Админ имплементации может изменить адрес имплементации", async function () {
         // Развертывание новой имплементации ERC20
         newErc20Mock = await ERC20Mock.deploy();
         await newErc20Mock.waitForDeployment();
@@ -98,7 +100,7 @@ describe("Proxy", function () {
         );
     });
 
-    it("Should deny non-admin access to upgradeTo", async function () {
+    it("Не админ не может изменить адрес имплементации", async function () {
         // Попытка обновления имплементации от имени пользователя (не админа)
         const proxyAsUser = new ethers.Contract(
             proxy.target,

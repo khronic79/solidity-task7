@@ -5,8 +5,8 @@ contract ContractForFactory {
     address public creator;
     string public name;
 
-    constructor(string memory _name) {
-        creator = msg.sender;
+    constructor(string memory _name, address _creator) {
+        creator = _creator;
         name = _name;
     }
 }
