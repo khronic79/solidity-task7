@@ -31,7 +31,7 @@ git clone git@github.com:khronic79/solidity-task4.git
 ```
 2. Установить зависимости для Node js, например:
 ```shell
-npn init
+npm init
 ```
 3. Запустить тест:
 ```shell
