@@ -2,8 +2,6 @@
 
 pragma solidity 0.8.28;
 
-import "./MyERC20.sol";
-
 interface ITransparentUpgradeableProxy {
     function upgradeTo(address newImplementation) external;
 }

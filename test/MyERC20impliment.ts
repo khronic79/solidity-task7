@@ -19,9 +19,10 @@ describe("КОНТРАКТ С РОЛЕВОЙ МОДЕЛЬЮ И PERMIT", function
     beforeEach(async function () {
         [owner, addr1, addr2, ...addrs] = await ethers.getSigners();
         // Деплоим контракт
-        MyERC20 = await ethers.getContractFactory("MyERC20");
+        MyERC20 = await ethers.getContractFactory("MyERC20impliment");
         myERC20 = await MyERC20.deploy();
         await myERC20.waitForDeployment();
+        await myERC20.initialize();
     });
 
     describe("ДЕПЛОЙ", function () {
