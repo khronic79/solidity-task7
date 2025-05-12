@@ -14,6 +14,9 @@
     "format-sol": "prettier --write --plugin=prettier-plugin-solidity 'contracts/**/*.sol'"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^5.2.0"
+    "@openzeppelin/contracts": "^5.2.0",
+    "@openzeppelin/contracts-upgradeable": "^5.3.0",
+    "dotenv": "^16.5.0",
+    "web3": "^4.16.0"
   }
 }
