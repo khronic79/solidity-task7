@@ -1,7 +1,10 @@
 import { expect } from "chai";
-import { ethers } from "hardhat";
+import { ethers, network  } from "hardhat";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
+import dotenv from "dotenv";
 
+dotenv.config();
+const initializer = new ethers.Wallet(`0x${process.env.PRIVATE_KEY}`, ethers.provider);
 describe("КОНТРАКТ С РОЛЕВОЙ МОДЕЛЬЮ И PERMIT", function () {
     let MyERC20: any;
     let myERC20: any;
@@ -18,8 +21,12 @@ describe("КОНТРАКТ С РОЛЕВОЙ МОДЕЛЬЮ И PERMIT", function
 
     beforeEach(async function () {
         [owner, addr1, addr2, ...addrs] = await ethers.getSigners();
+        await network.provider.send("hardhat_setBalance", [
+            initializer.address,
+            ethers.toQuantity(ethers.parseEther("1000"))
+        ]);
         // Деплоим контракт
-        MyERC20 = await ethers.getContractFactory("MyERC20impliment");
+        MyERC20 = await ethers.getContractFactory("MyERC20impliment", initializer);
         myERC20 = await MyERC20.deploy();
         await myERC20.waitForDeployment();
         await myERC20.initialize();
@@ -28,12 +35,12 @@ describe("КОНТРАКТ С РОЛЕВОЙ МОДЕЛЬЮ И PERMIT", function
     describe("ДЕПЛОЙ", function () {
         it("Тот кто деплоит контракт должен быть админом", async function () {
             expect(
-                await myERC20.hasRole(await myERC20.ADMIN_ROLE(), owner.address)
+                await myERC20.hasRole(await myERC20.ADMIN_ROLE(), initializer.address)
             ).to.equal(true);
         });
 
         it("На деплоера должно быть сминчено 1000000 токенов", async function () {
-            const ownerBalance = await myERC20.balanceOf(owner.address);
+            const ownerBalance = await myERC20.balanceOf(initializer.address);
             expect(await myERC20.totalSupply()).to.equal(ownerBalance);
             expect(ownerBalance).to.equal(INITIAL_SUPPLY);
         });
@@ -98,8 +105,8 @@ describe("КОНТРАКТ С РОЛЕВОЙ МОДЕЛЬЮ И PERMIT", function
     describe("БЕРНИНГ", function () {
         it("Бернинг должен осуществляться с адреса бернера", async function () {
             await myERC20.changeBurner(addr1.address);
-            await myERC20.connect(addr1).burn(owner.address, BURN_AMOUNT);
-            expect(await myERC20.balanceOf(owner.address)).to.equal(
+            await myERC20.connect(addr1).burn(initializer.address, BURN_AMOUNT);
+            expect(await myERC20.balanceOf(initializer.address)).to.equal(
                 INITIAL_SUPPLY - BURN_AMOUNT
             );
         });
